@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register · Taska</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-scene">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<div class="page">
+  <div class="card auth-card" style="max-width:540px">
+
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-mark">✦</div>
+      <span class="logo-text">Taska</span>
+    </div>
+
+    <h1 class="page-title">Create account</h1>
+    <p class="page-sub">Join thousands of people getting things done</p>
+
+    <!-- ---- Row 1: First + Last Name ---- -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="regFirstName">First Name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="regFirstName" placeholder="John" autocomplete="given-name" />
+        </div>
+        <div class="err-msg" id="firstNameErr"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="regLastName">Last Name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="regLastName" placeholder="Doe" autocomplete="family-name" />
+        </div>
+        <div class="err-msg" id="lastNameErr"></div>
+      </div>
+    </div>
+
+    <!-- ---- Row 2: Email + Phone ---- -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="regEmail">Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉</span>
+          <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="err-msg" id="regEmailErr"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="regPhone">Phone Number</label>
+        <div class="input-wrap">
+          <span class="input-icon">📱</span>
+          <input type="tel" id="regPhone" placeholder="+91 98765 43210" autocomplete="tel" />
+        </div>
+        <div class="err-msg" id="regPhoneErr"></div>
+      </div>
+    </div>
+
+    <!-- ---- Username ---- -->
+    <div class="form-group">
+      <label for="regUsername">Username</label>
+      <div class="input-wrap">
+        <span class="input-icon">@</span>
+        <input type="text" id="regUsername" placeholder="john_doe" autocomplete="username" />
+      </div>
+      <div class="err-msg" id="regUsernameErr"></div>
+    </div>
+
+    <!-- ---- Password ---- -->
+    <div class="form-group">
+      <label for="regPassword">Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="regPassword" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this.value)" />
+        <button class="eye-btn" type="button" onclick="toggleEye('regPassword',this)">👁</button>
+      </div>
+
+      <!-- Strength meter -->
+      <div class="strength-wrap" id="strengthWrap" style="display:none">
+        <div class="strength-bars">
+          <div class="strength-bar" id="sb1"></div>
+          <div class="strength-bar" id="sb2"></div>
+          <div class="strength-bar" id="sb3"></div>
+          <div class="strength-bar" id="sb4"></div>
+        </div>
+        <span class="strength-label" id="strengthLabel"></span>
+      </div>
+      <div class="err-msg" id="regPassErr"></div>
+    </div>
+
+    <!-- ---- Confirm Password ---- -->
+    <div class="form-group">
+      <label for="regConfirm">Confirm Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔑</span>
+        <input type="password" id="regConfirm" placeholder="Repeat your password" autocomplete="new-password" />
+        <button class="eye-btn" type="button" onclick="toggleEye('regConfirm',this)">👁</button>
+      </div>
+      <div class="err-msg" id="regConfirmErr"></div>
+    </div>
+
+    <!-- ---- Terms ---- -->
+    <div class="checkbox-row">
+      <input type="checkbox" id="agreeTerms" />
+      <label for="agreeTerms">
+        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+      </label>
+    </div>
+    <div class="err-msg" id="termsErr" style="margin-top:-12px;margin-bottom:14px"></div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="newsletter" checked />
+      <label for="newsletter">Send me tips and productivity updates via email</label>
+    </div>
+
+    <button class="btn btn-primary" id="regBtn" onclick="register()">Create Account 🎉</button>
+
+    <p class="auth-footer">
+      Already have an account? <a href="login.html">Sign in</a>
+    </p>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+<script>
+  // Redirect if already logged in
+  if (localStorage.getItem('taska_session')) window.location.href = 'dashboard.html';
+
+  function checkStrength(pass) {
+    const wrap = document.getElementById('strengthWrap');
+    if (!pass) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+
+    let score = 0;
+    if (pass.length >= 6)                   score++;
+    if (pass.length >= 10)                  score++;
+    if (/[A-Z]/.test(pass))                 score++;
+    if (/[0-9]/.test(pass))                 score++;
+    if (/[^A-Za-z0-9]/.test(pass))          score++;
+
+    const bars  = [document.getElementById('sb1'), document.getElementById('sb2'),
+                   document.getElementById('sb3'), document.getElementById('sb4')];
+    const label = document.getElementById('strengthLabel');
+
+    // Reset
+    bars.forEach(b => b.className = 'strength-bar');
+
+    const levels = [
+      { min: 0, cls: 'weak',   txt: 'Weak',        fill: 1 },
+      { min: 2, cls: 'fair',   txt: 'Fair',        fill: 2 },
+      { min: 3, cls: 'good',   txt: 'Good',        fill: 3 },
+      { min: 5, cls: 'strong', txt: 'Strong 💪', fill: 4 },
+    ];
+
+    let lvl = levels[0];
+    levels.forEach(l => { if (score >= l.min) lvl = l; });
+
+    for (let i = 0; i < lvl.fill; i++) bars[i].classList.add(lvl.cls);
+    label.textContent  = lvl.txt;
+    label.className    = 'strength-label ' + lvl.cls;
+  }
+
+  function register() {
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const lastName  = document.getElementById('regLastName').value.trim();
+    const email     = document.getElementById('regEmail').value.trim();
+    const phone     = document.getElementById('regPhone').value.trim();
+    const username  = document.getElementById('regUsername').value.trim();
+    const pass      = document.getElementById('regPassword').value;
+    const confirm   = document.getElementById('regConfirm').value;
+    const agreed    = document.getElementById('agreeTerms').checked;
+    const btn       = document.getElementById('regBtn');
+
+    clearErrors();
+    let valid = true;
+
+    if (!firstName) { showErr('firstNameErr',   'First name is required');         valid = false; }
+    if (!lastName)  { showErr('lastNameErr',    'Last name is required');           valid = false; }
+
+    if (!email)              { showErr('regEmailErr',    'Email is required');          valid = false; }
+    else if (!validEmail(email)) { showErr('regEmailErr', 'Enter a valid email address'); valid = false; }
+
+    if (phone && !/^[+\d\s\-()]{7,15}$/.test(phone)) {
+      showErr('regPhoneErr', 'Enter a valid phone number'); valid = false;
+    }
+
+    if (!username)           { showErr('regUsernameErr', 'Username is required');       valid = false; }
+    else if (username.length < 3) { showErr('regUsernameErr', 'Username must be 3+ characters'); valid = false; }
+    else if (!/^[a-zA-Z0-9_]+$/.test(username)) { showErr('regUsernameErr', 'Only letters, numbers, underscores'); valid = false; }
+
+    if (!pass)               { showErr('regPassErr',    'Password is required');        valid = false; }
+    else if (pass.length < 6){ showErr('regPassErr',    'Password must be 6+ characters'); valid = false; }
+
+    if (!confirm)            { showErr('regConfirmErr', 'Please confirm your password'); valid = false; }
+    else if (pass !== confirm){ showErr('regConfirmErr', 'Passwords do not match');       valid = false; }
+
+    if (!agreed) { showErr('termsErr', '⚠️ You must agree to the Terms of Service'); valid = false; }
+
+    if (!valid) return;
+
+    // Check duplicate email
+    const users = JSON.parse(localStorage.getItem('taska_users') || '[]');
+    if (users.find(u => u.email === email)) {
+      showErr('regEmailErr', 'An account with this email already exists');
+      return;
+    }
+    if (users.find(u => u.username === username)) {
+      showErr('regUsernameErr', 'Username is already taken');
+      return;
+    }
+
+    btn.textContent = 'Creating account…';
+    btn.disabled    = true;
+
+    setTimeout(() => {
+      const newUser = {
+        id:        Date.now(),
+        name:      firstName + ' ' + lastName,
+        firstName, lastName, email, phone, username,
+        password:  pass,
+        createdAt: new Date().toISOString(),
+        newsletter: document.getElementById('newsletter').checked,
+      };
+
+      users.push(newUser);
+      localStorage.setItem('taska_users', JSON.stringify(users));
+      localStorage.setItem('taska_session', JSON.stringify({ id: newUser.id, name: newUser.name, email: newUser.email }));
+
+      toast('Account created! Redirecting… 🎉', 'success');
+      setTimeout(() => window.location.href = 'dashboard.html', 900);
+    }, 700);
+  }
+</script>
+</body>
+</html>
