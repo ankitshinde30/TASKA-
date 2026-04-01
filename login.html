@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login · Taska</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-scene">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<div class="page">
+  <div class="card auth-card">
+
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-mark">✦</div>
+      <span class="logo-text">Taska</span>
+    </div>
+
+    <h1 class="page-title">Welcome back</h1>
+    <p class="page-sub">Sign in to continue to your workspace</p>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="loginEmail">Email Address</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉</span>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="err-msg" id="loginEmailErr"></div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+      <label for="loginPassword">Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" />
+        <button class="eye-btn" type="button" onclick="toggleEye('loginPassword',this)" title="Show/hide">👁</button>
+      </div>
+      <div class="err-msg" id="loginPassErr"></div>
+    </div>
+
+    <!-- Remember -->
+    <div class="checkbox-row">
+      <input type="checkbox" id="rememberMe" />
+      <label for="rememberMe">Remember me for 7 days</label>
+    </div>
+
+    <button class="btn btn-primary" id="loginBtn" onclick="login()">Sign In →</button>
+
+    <div class="divider"><span>or</span></div>
+
+    <button class="btn btn-ghost" style="width:100%" onclick="demoLogin()">🎭 Try Demo Account</button>
+
+    <p class="auth-footer">
+      No account yet? <a href="register.html">Create one free</a>
+    </p>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+<script>
+  // Redirect if already logged in
+  if (localStorage.getItem('taska_session')) window.location.href = 'dashboard.html';
+
+  function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value;
+    const btn   = document.getElementById('loginBtn');
+
+    clearErrors();
+
+    let valid = true;
+    if (!email)           { showErr('loginEmailErr', 'Email is required');    valid = false; }
+    else if (!validEmail(email)) { showErr('loginEmailErr', 'Enter a valid email'); valid = false; }
+    if (!pass)            { showErr('loginPassErr',  'Password is required'); valid = false; }
+    if (!valid) return;
+
+    btn.textContent = 'Signing in…';
+    btn.disabled    = true;
+
+    setTimeout(() => {
+      const users = JSON.parse(localStorage.getItem('taska_users') || '[]');
+      const user  = users.find(u => u.email === email && u.password === pass);
+
+      if (user) {
+        localStorage.setItem('taska_session', JSON.stringify({ id: user.id, name: user.name, email: user.email }));
+        toast('Welcome back, ' + user.name + '! 👋', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 700);
+      } else {
+        showErr('loginPassErr', 'Incorrect email or password');
+        btn.textContent = 'Sign In →';
+        btn.disabled    = false;
+        shake(btn);
+      }
+    }, 600);
+  }
+
+  function demoLogin() {
+    // Create demo user if not exists
+    let users = JSON.parse(localStorage.getItem('taska_users') || '[]');
+    let demo  = users.find(u => u.email === 'demo@taska.app');
+    if (!demo) {
+      demo = { id: 'demo', name: 'Demo User', email: 'demo@taska.app', password: 'demo123', phone: '0000000000' };
+      users.push(demo);
+      localStorage.setItem('taska_users', JSON.stringify(users));
+    }
+    seedDemoTasks();
+    localStorage.setItem('taska_session', JSON.stringify({ id: demo.id, name: demo.name, email: demo.email }));
+    window.location.href = 'dashboard.html';
+  }
+
+  function seedDemoTasks() {
+    if (localStorage.getItem('taska_tasks_demo')) return;
+    const today    = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    const tasks = [
+      { id: 1, text: 'Review project proposal', category: 'Work',     priority: 'High',   due: today,     completed: false, createdAt: new Date().toISOString() },
+      { id: 2, text: 'Morning standup call',     category: 'Work',     priority: 'Medium', due: today,     completed: true,  createdAt: new Date().toISOString() },
+      { id: 3, text: 'Buy groceries',             category: 'Personal', priority: 'Low',    due: tomorrow,  completed: false, createdAt: new Date().toISOString() },
+      { id: 4, text: 'Finish UI redesign',        category: 'Work',     priority: 'High',   due: tomorrow,  completed: false, createdAt: new Date().toISOString() },
+      { id: 5, text: 'Read 30 pages',             category: 'Learning', priority: 'Low',    due: '',        completed: false, createdAt: new Date().toISOString() },
+    ];
+    localStorage.setItem('taska_tasks_demo', JSON.stringify(tasks));
+  }
+
+  function shake(el) {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = 'shake 0.4s ease';
+    setTimeout(() => el.style.animation = '', 400);
+  }
+
+  // Inject shake keyframe
+  const s = document.createElement('style');
+  s.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }`;
+  document.head.appendChild(s);
+</script>
+</body>
+</html>
