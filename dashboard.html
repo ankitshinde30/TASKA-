@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · Taska</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-scene">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<div class="page dash-page">
+  <div class="dash-layout">
+
+    <!-- ===== TOPBAR ===== -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo-mark" style="width:36px;height:36px;font-size:16px">✦</div>
+        <div class="topbar-left" style="flex-direction:column;gap:0;align-items:flex-start">
+          <div class="topbar-greeting" id="greeting">Good morning</div>
+          <div class="topbar-name" id="topbarName">Loading…</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:var(--grey-2)" id="topbarDate"></span>
+        <button class="btn-icon" onclick="logout()" title="Logout">🚪</button>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card total">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+      <div class="stat-card done">
+        <div class="stat-num" id="statDone">0</div>
+        <div class="stat-lbl">Done</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-num" id="statPending">0</div>
+        <div class="stat-lbl">Pending</div>
+      </div>
+      <div class="stat-card high">
+        <div class="stat-num" id="statHigh">0</div>
+        <div class="stat-lbl">High Priority</div>
+      </div>
+    </div>
+
+    <!-- ===== ADD TASK PANEL ===== -->
+    <div class="add-panel">
+      <div class="add-panel-title">✦ Add New Task</div>
+
+      <div class="add-row">
+        <!-- Task text -->
+        <div class="input-wrap">
+          <span class="input-icon">📝</span>
+          <input type="text" id="taskInput" placeholder="What needs to be done?" />
+        </div>
+        <!-- Category -->
+        <select id="taskCategory" class="no-icon" style="padding-left:14px">
+          <option value="General">📁 General</option>
+          <option value="Work">💼 Work</option>
+          <option value="Personal">🏠 Personal</option>
+          <option value="Learning">📚 Learning</option>
+          <option value="Health">🏋️ Health</option>
+          <option value="Finance">💰 Finance</option>
+        </select>
+        <!-- Priority -->
+        <select id="taskPriority" class="no-icon" style="padding-left:14px">
+          <option value="Medium">🟡 Medium</option>
+          <option value="High">🔴 High</option>
+          <option value="Low">🟢 Low</option>
+        </select>
+        <!-- Due date -->
+        <input type="date" id="taskDue" class="no-icon" style="padding-left:14px" />
+      </div>
+
+      <div class="add-btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="clearAddForm()">Clear</button>
+        <button class="btn add-task-btn" onclick="addTask()">+ Add Task</button>
+      </div>
+    </div>
+
+    <!-- ===== CONTROLS ===== -->
+    <div class="controls">
+      <!-- Search -->
+      <div class="search-wrap">
+        <span class="input-icon" style="z-index:1">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search tasks…"
+          oninput="renderTasks()"
+          style="padding-left:42px"
+        />
+      </div>
+
+      <!-- Filter pills -->
+      <div class="filter-pills">
+        <div class="pill active" data-filter="all"       onclick="setFilter('all',this)">All</div>
+        <div class="pill"        data-filter="pending"   onclick="setFilter('pending',this)">Pending</div>
+        <div class="pill"        data-filter="completed" onclick="setFilter('completed',this)">Done</div>
+        <div class="pill"        data-filter="high"      onclick="setFilter('high',this)">🔴 High</div>
+        <div class="pill"        data-filter="today"     onclick="setFilter('today',this)">📅 Today</div>
+      </div>
+
+      <!-- Sort -->
+      <select id="sortSelect" class="sort-select no-icon" onchange="renderTasks()">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="priority">Priority</option>
+        <option value="due">Due Date</option>
+        <option value="az">A → Z</option>
+      </select>
+    </div>
+
+    <!-- ===== TASK LIST ===== -->
+    <div class="task-list" id="taskList"></div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+<script>
+  // ---- Auth guard ----
+  const session = JSON.parse(localStorage.getItem('taska_session') || 'null');
+  if (!session) window.location.href = 'login.html';
+
+  // ---- Topbar init ----
+  document.getElementById('topbarName').textContent = session ? session.name : 'User';
+
+  const hour = new Date().getHours();
+  document.getElementById('greeting').textContent =
+    hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,';
+
+  document.getElementById('topbarDate').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+
+  // ---- Default due date = today ----
+  document.getElementById('taskDue').value = new Date().toISOString().split('T')[0];
+
+  // ---- Enter key to add ----
+  document.getElementById('taskInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  // ---- Init ----
+  renderTasks();
+  updateStats();
+</script>
+</body>
+</html>
