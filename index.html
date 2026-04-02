@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taska · Smart To-Do App</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ---- Hero specific ---- */
+    .hero-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAV */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(5,5,10,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(124,58,237,0.1);
+    }
+
+    .nav-btns { display: flex; gap: 10px; }
+
+    /* HERO */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 999px;
+      background: rgba(124,58,237,0.1);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--violet-3);
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(42px, 7vw, 80px);
+      font-weight: 800;
+      line-height: 1.08;
+      color: var(--white);
+      margin-bottom: 22px;
+      animation: fadeUp 0.55s ease 0.1s both;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--violet-2), var(--violet-4));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 19px);
+      color: var(--grey-2);
+      max-width: 520px;
+      line-height: 1.65;
+      margin-bottom: 40px;
+      animation: fadeUp 0.55s ease 0.2s both;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.55s ease 0.3s both;
+    }
+
+    .btn-hero-primary {
+      padding: 15px 34px;
+      font-size: 16px;
+      background: linear-gradient(135deg, var(--violet), #5b21b6);
+      box-shadow: 0 6px 28px var(--violet-glow);
+      border-radius: var(--radius);
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 36px var(--violet-glow);
+    }
+
+    .btn-hero-ghost {
+      padding: 15px 34px;
+      font-size: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: var(--radius);
+      color: var(--grey-1);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hero-ghost:hover {
+      background: var(--violet-soft);
+      border-color: var(--violet);
+      color: var(--violet-3);
+      transform: translateY(-2px);
+    }
+
+    /* STATS STRIP */
+    .stats-strip {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 28px 24px;
+      border-top: 1px solid rgba(124,58,237,0.12);
+      border-bottom: 1px solid rgba(124,58,237,0.12);
+      background: rgba(10,10,18,0.5);
+      backdrop-filter: blur(10px);
+      animation: fadeUp 0.55s ease 0.45s both;
+      flex-wrap: wrap;
+    }
+
+    .strip-stat { text-align: center; }
+
+    .strip-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--violet-3);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .strip-lbl { font-size: 13px; color: var(--grey-2); font-weight: 500; }
+
+    /* FEATURES */
+    .features {
+      padding: 90px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeUp 0.6s ease 0.55s both;
+    }
+
+    .features-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .features-sub {
+      text-align: center;
+      color: var(--grey-2);
+      font-size: 15px;
+      margin-bottom: 56px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feat-card {
+      background: var(--black-3);
+      border: 1px solid rgba(124,58,237,0.12);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--violet), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .feat-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124,58,237,0.3);
+      box-shadow: 0 12px 32px rgba(124,58,237,0.15);
+    }
+
+    .feat-card:hover::after { opacity: 1; }
+
+    .feat-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .feat-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feat-desc {
+      font-size: 14px;
+      color: var(--grey-2);
+      line-height: 1.65;
+    }
+
+    /* APP PREVIEW */
+    .preview-section {
+      padding: 0 48px 90px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .preview-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--violet-3);
+      margin-bottom: 24px;
+    }
+
+    .preview-window {
+      background: var(--black-3);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(124,58,237,0.1);
+      overflow: hidden;
+    }
+
+    .preview-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 18px;
+      background: var(--black-4);
+      border-bottom: 1px solid rgba(124,58,237,0.1);
+    }
+
+    .preview-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .preview-url {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: var(--grey-3);
+      font-family: monospace;
+    }
+
+    .preview-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .preview-topbar-mini {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--black-4);
+      border: 1px solid rgba(124,58,237,0.1);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+
+    .preview-avatar-mini {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet), #5b21b6);
+    }
+
+    .preview-stats-mini {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .preview-stat-mini {
+      background: var(--black-4);
+      border: 1px solid rgba(124,58,237,0.1);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .psm-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--violet-3);
+    }
+
+    .psm-lbl { font-size: 10px; color: var(--grey-3); margin-top: 2px; }
+
+    .preview-task-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--black-4);
+      border: 1px solid rgba(124,58,237,0.1);
+      border-radius: 10px;
+      padding: 11px 14px;
+    }
+
+    .ptm-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--grey-3);
+      flex-shrink: 0;
+    }
+
+    .ptm-dot.done {
+      background: var(--violet);
+      border-color: var(--violet);
+    }
+
+    .ptm-text {
+      flex: 1;
+      height: 10px;
+      border-radius: 5px;
+      background: var(--grey-3);
+      opacity: 0.5;
+    }
+
+    .ptm-badge {
+      height: 18px;
+      width: 44px;
+      border-radius: 20px;
+      background: rgba(124,58,237,0.2);
+    }
+
+    /* CTA BOTTOM */
+    .cta-bottom {
+      text-align: center;
+      padding: 80px 24px;
+      background: linear-gradient(180deg, transparent, rgba(124,58,237,0.06));
+      border-top: 1px solid rgba(124,58,237,0.1);
+      animation: fadeUp 0.6s ease 0.6s both;
+    }
+
+    .cta-bottom h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .cta-bottom p {
+      color: var(--grey-2);
+      font-size: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--grey-3);
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    footer a { color: var(--violet-3); text-decoration: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .nav { padding: 16px 20px; }
+      .features { padding: 60px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .preview-section { padding: 0 20px 60px; }
+      .preview-stats-mini { grid-template-columns: repeat(2, 1fr); }
+      .stats-strip { gap: 28px; }
+      .cta-bottom { padding: 60px 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-btns .btn-ghost { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-scene">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<div class="hero-page">
+
+  <!-- ===== NAV ===== -->
+  <nav class="nav">
+    <div class="logo">
+      <div class="logo-mark" style="width:36px;height:36px;font-size:16px">✦</div>
+      <span class="logo-text">Taska</span>
+    </div>
+    <div class="nav-btns">
+      <a href="login.html"    class="btn btn-ghost"  style="padding:9px 20px;font-size:14px">Sign In</a>
+      <a href="register.html" class="btn btn-primary" style="padding:9px 20px;font-size:14px;width:auto;margin:0">Get Started →</a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-badge">✦ Your productivity, elevated</div>
+
+    <h1 class="hero-title">
+      Get things done.<br />
+      <span>Stay in control.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Taska is a beautifully simple to-do app that helps you capture tasks,
+      set priorities, and track what matters — all saved right in your browser.
+    </p>
+
+    <div class="hero-cta">
+      <a href="register.html" class="btn-hero-primary">Start for free →</a>
+      <a href="login.html"    class="btn-hero-ghost">🎭 Try Demo</a>
+    </div>
+  </section>
+
+  <!-- ===== STATS STRIP ===== -->
+  <div class="stats-strip">
+    <div class="strip-stat">
+      <div class="strip-num">5</div>
+      <div class="strip-lbl">Features packed in</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">0ms</div>
+      <div class="strip-lbl">Load time</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">100%</div>
+      <div class="strip-lbl">Free forever</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-num">∞</div>
+      <div class="strip-lbl">Tasks you can add</div>
+    </div>
+  </div>
+
+  <!-- ===== APP PREVIEW ===== -->
+  <section class="preview-section" style="padding-top:80px">
+    <div class="preview-label">✦ Live App Preview</div>
+    <div class="preview-window">
+      <div class="preview-titlebar">
+        <div class="preview-dot" style="background:#ef4444"></div>
+        <div class="preview-dot" style="background:#f59e0b"></div>
+        <div class="preview-dot" style="background:#10b981"></div>
+        <div class="preview-url">taska.vercel.app/dashboard</div>
+      </div>
+      <div class="preview-body">
+        <!-- Mini topbar -->
+        <div class="preview-topbar-mini">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="preview-avatar-mini"></div>
+            <div>
+              <div style="height:8px;width:60px;background:var(--grey-3);border-radius:4px;opacity:0.5;margin-bottom:4px"></div>
+              <div style="height:10px;width:100px;background:var(--grey-3);border-radius:4px;opacity:0.3"></div>
+            </div>
+          </div>
+          <div style="height:28px;width:28px;border-radius:8px;background:var(--black-5);border:1px solid var(--grey-3)"></div>
+        </div>
+        <!-- Mini stats -->
+        <div class="preview-stats-mini">
+          <div class="preview-stat-mini"><div class="psm-num" style="color:var(--violet-3)">8</div><div class="psm-lbl">Total</div></div>
+          <div class="preview-stat-mini"><div class="psm-num" style="color:var(--green)">5</div><div class="psm-lbl">Done</div></div>
+          <div class="preview-stat-mini"><div class="psm-num" style="color:var(--amber)">3</div><div class="psm-lbl">Pending</div></div>
+          <div class="preview-stat-mini"><div class="psm-num" style="color:var(--red)">1</div><div class="psm-lbl">High</div></div>
+        </div>
+        <!-- Mini tasks -->
+        <div class="preview-task-mini" style="border-left:3px solid var(--red)">
+          <div class="ptm-dot done"></div>
+          <div class="ptm-text" style="opacity:0.3;text-decoration:line-through"></div>
+          <div class="ptm-badge" style="background:rgba(239,68,68,0.15)"></div>
+        </div>
+        <div class="preview-task-mini" style="border-left:3px solid var(--amber)">
+          <div class="ptm-dot"></div>
+          <div class="ptm-text" style="width:60%"></div>
+          <div class="ptm-badge" style="background:rgba(245,158,11,0.15)"></div>
+        </div>
+        <div class="preview-task-mini" style="border-left:3px solid var(--green)">
+          <div class="ptm-dot"></div>
+          <div class="ptm-text" style="width:75%"></div>
+          <div class="ptm-badge" style="background:rgba(16,185,129,0.15)"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="features">
+    <h2 class="features-title">Everything you need. <span style="background:linear-gradient(135deg,var(--violet-2),var(--violet-4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Nothing you don't.</span></h2>
+    <p class="features-sub">Built fast, designed beautifully, zero setup required.</p>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <span class="feat-icon">✅</span>
+        <div class="feat-title">Smart Task Manager</div>
+        <div class="feat-desc">Add tasks with priority levels, categories, and due dates. Mark complete, edit inline, or delete — all with instant feedback.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔍</span>
+        <div class="feat-title">Search & Filter</div>
+        <div class="feat-desc">Instantly search across all your tasks. Filter by status, priority, or due date. Sort by newest, oldest, priority, or A–Z.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">Live Stats Dashboard</div>
+        <div class="feat-desc">See your productivity at a glance — total tasks, completed, pending, and high-priority counts update in real time.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔒</span>
+        <div class="feat-title">Secure Local Auth</div>
+        <div class="feat-desc">Full registration with name, email, phone, username and password strength validation. Your data stays in your browser.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">⚡</span>
+        <div class="feat-title">Instant & Offline</div>
+        <div class="feat-desc">No server, no loading spinners. Everything is stored in localStorage — works even without an internet connection.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🎨</span>
+        <div class="feat-title">Dark Violet Design</div>
+        <div class="feat-desc">Stunning dark black and electric violet theme with animated background, smooth transitions, and mobile-responsive layout.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BOTTOM CTA ===== -->
+  <section class="cta-bottom">
+    <h2>Ready to get started?</h2>
+    <p>Create your free account in under 30 seconds. No credit card needed.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="register.html" class="btn-hero-primary">Create Free Account →</a>
+      <a href="login.html"    class="btn-hero-ghost">Already have an account</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <span>✦ Taska · Built with pure HTML, CSS & JavaScript · </span>
+    <a href="register.html">Get Started</a> ·
+    <a href="login.html">Sign In</a>
+  </footer>
+
+</div>
+
+<script>
+  // If already logged in, redirect straight to dashboard
+  if (localStorage.getItem('taska_session')) {
+    window.location.href = 'dashboard.html';
+  }
+
+  // Demo button on hero goes to login with demo
+  document.querySelector('.btn-hero-ghost').addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = 'login.html';
+  });
+</script>
+
+</body>
+</html>
